@@ -121,7 +121,6 @@ export default function Dashboard() {
 
     return (
         <div style={{ padding: 16 }}>
-            <LogForm />
             <div style={{ width: "100%", height: 420 }}>
                 <ResponsiveContainer>
                     <BarChart data={chartData} margin={{ top: 20, right: 20, left: 20, bottom: 60 }}>
