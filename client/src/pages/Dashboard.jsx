@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import LogForm from "../components/LogForm";
 import Recommendation from "../components/Recommendation";
+import Papa from 'papaparse';
 
 import {
     ResponsiveContainer,
@@ -16,11 +17,30 @@ import {
 } from "recharts";
 
 const METRICS = ["악력", "윗몸일으키기", "유연성", "BMI", "체지방률"];
+// csv raw file URLs
+const STATS_RAW_URL = 'https://media.githubusercontent.com/media/seohaneul/Mind-fit/refs/heads/main/server/data/kspo_measurements.csv';
+const PROGRAMS_RAW_URL = 'https://media.githubusercontent.com/media/seohaneul/Mind-fit/refs/heads/main/server/data/kspo_programs.csv';
+const LOCATIONS_RAW_URL = 'https://media.githubusercontent.com/media/seohaneul/Mind-fit/refs/heads/main/server/data/kspo_facilities.csv';
+
+// CSV 텍스트를 파싱하는 헬퍼 함수
+const parseCsv = (csvText) => {
+    const { data } = Papa.parse(csvText, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+    });
+    return Array.isArray(data) ? data : [];
+};
 
 export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [avgData, setAvgData] = useState([]);
     const [myRecord, setMyRecord] = useState(null);
+
+    // 💡 [추가] 나머지 2개의 데이터를 저장할 상태
+    const [programsData, setProgramsData] = useState([]);
+    const [locationsData, setLocationsData] = useState([]);
+
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -28,12 +48,34 @@ export default function Dashboard() {
         async function load() {
             setLoading(true);
             try {
-                const [statsRes, logsRes] = await Promise.all([axios.get("/api/stats"), axios.get("/api/logs/physical")]);
+                // ----------------------------------------------------
+                // 💡 [수정] 3개의 URL과 사용자 로그 API를 동시에 호출합니다.
+                // ----------------------------------------------------
+                const [statsRes, programsRes, locationsRes, logsRes] = await Promise.all([
+                    // 3개의 CSV Raw Link 호출
+                    axios.get(STATS_RAW_URL),
+                    axios.get(PROGRAMS_RAW_URL),
+                    axios.get(LOCATIONS_RAW_URL),
+                    // 사용자 로그 API 호출
+                    axios.get("/api/logs/physical")
+                ]);
+                // ----------------------------------------------------
+
                 if (!mounted) return;
 
-                const stats = Array.isArray(statsRes.data) ? statsRes.data : [];
+                // ----------------------------------------------------
+                // 💡 [수정] 3개의 CSV 파일을 파싱하고 상태에 저장합니다.
+                // ----------------------------------------------------
+                const fullStats = parseCsv(statsRes.data);
+                const programs = parseCsv(programsRes.data);
+                const locations = parseCsv(locationsRes.data);
+
+                setProgramsData(programs);      // 프로그램 데이터 저장
+                setLocationsData(locations);    // 위치 데이터 저장
+                // ----------------------------------------------------
+
                 // 필터: 20대, 남자
-                const filtered = stats.filter(
+                const filtered = fullStats.filter(
                     (d) =>
                         String(d.ageGroup).trim() === "20대" &&
                         ["M", "m", "남", "남자", "Male"].includes(String(d.gender).trim())
@@ -104,7 +146,7 @@ export default function Dashboard() {
             </div>
 
             {/* Recommendation: userStats = myRecord, averageStats = avgData */}
-            <Recommendation userStats={myRecord} averageStats={avgData} />
+            <Recommendation userStats={myRecord} averageStats={avgData} programs={programsData} locations={locationsData} />
         </div>
     );
 }
