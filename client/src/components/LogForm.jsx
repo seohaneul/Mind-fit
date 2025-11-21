@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 // import axios from "axios";
 
-export default function LogForm() {
+export default function LogForm({ onLogSubmit }) {
     const [values, setValues] = useState({
         악력: "",
         윗몸일으키기: "",
@@ -33,6 +33,12 @@ export default function LogForm() {
         // };
         setSaving(true);
         try {
+            // 🚨 [핵심 수정] 서버 전송(axios.post) 대신, 
+            // 상위 컴포넌트의 상태 업데이트 함수를 호출합니다.
+            if (onLogSubmit && typeof onLogSubmit === 'function') {
+                onLogSubmit(values); // Dashboard의 setMyRecord(values)를 실행!
+                console.log("데이터 입력 성공! (상위 컴포넌트 상태 업데이트):", values);
+            }
             // await axios.post("/api/logs/physical", { metrics, date: new Date().toISOString() });
             alert("저장되었습니다!");
             // optionally clear or keep values
