@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import LogForm from "../components/LogForm";
 import Recommendation from "../components/Recommendation";
 import Papa from 'papaparse';
 
