@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import LogForm from "../components/LogForm";
 import Recommendation from "../components/Recommendation";
 import Papa from 'papaparse';
 
@@ -121,6 +122,7 @@ export default function Dashboard() {
 
     return (
         <div style={{ padding: 16 }}>
+            <LogForm />
             <div style={{ width: "100%", height: 420 }}>
                 <ResponsiveContainer>
                     <BarChart data={chartData} margin={{ top: 20, right: 20, left: 20, bottom: 60 }}>

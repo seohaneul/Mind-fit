@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+// import axios from "axios";
 
 export default function LogForm() {
     const [values, setValues] = useState({
@@ -15,25 +15,25 @@ export default function LogForm() {
         setValues((s) => ({ ...s, [e.target.name]: e.target.value }));
     };
 
-    const toNumberOrNull = (v) => {
-        if (v == null || v === "") return null;
-        const n = Number(String(v).replace(/,/g, ""));
-        return Number.isFinite(n) ? n : null;
-    };
+    // const toNumberOrNull = (v) => {
+    //     if (v == null || v === "") return null;
+    //     const n = Number(String(v).replace(/,/g, ""));
+    //     return Number.isFinite(n) ? n : null;
+    // };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (saving) return;
-        const metrics = {
-            악력: toNumberOrNull(values["악력"]),
-            윗몸일으키기: toNumberOrNull(values["윗몸일으키기"]),
-            유연성: toNumberOrNull(values["유연성"]),
-            BMI: toNumberOrNull(values["BMI"]),
-            체지방률: toNumberOrNull(values["체지방률"]),
-        };
+        // const metrics = {
+        //     악력: toNumberOrNull(values["악력"]),
+        //     윗몸일으키기: toNumberOrNull(values["윗몸일으키기"]),
+        //     유연성: toNumberOrNull(values["유연성"]),
+        //     BMI: toNumberOrNull(values["BMI"]),
+        //     체지방률: toNumberOrNull(values["체지방률"]),
+        // };
         setSaving(true);
         try {
-            await axios.post("/api/logs/physical", { metrics, date: new Date().toISOString() });
+            // await axios.post("/api/logs/physical", { metrics, date: new Date().toISOString() });
             alert("저장되었습니다!");
             // optionally clear or keep values
         } catch (err) {
