@@ -49,32 +49,22 @@ export default function Dashboard() {
             setLoading(true);
             try {
                 // ----------------------------------------------------
-                // 💡 [수정] 3개의 URL과 사용자 로그 API를 동시에 호출합니다.
+                // 💡 [수정] 실패하는 /api/logs/physical 호출을 완전히 제거합니다.
                 // ----------------------------------------------------
-                const [statsRes, programsRes, locationsRes, logsRes] = await Promise.all([
-                    // 3개의 CSV Raw Link 호출
+                const [statsRes, programsRes, locationsRes] = await Promise.all([
                     axios.get(STATS_RAW_URL),
                     axios.get(PROGRAMS_RAW_URL),
                     axios.get(LOCATIONS_RAW_URL),
-                    // 사용자 로그 API 호출
-                    axios.get("/api/logs/physical")
                 ]);
-                // ----------------------------------------------------
 
                 if (!mounted) return;
 
-                // ----------------------------------------------------
-                // 💡 [수정] 3개의 CSV 파일을 파싱하고 상태에 저장합니다.
-                // ----------------------------------------------------
+                // 3개의 CSV 파일을 파싱하고 상태에 저장합니다.
                 const fullStats = parseCsv(statsRes.data);
-                const programs = parseCsv(programsRes.data);
-                const locations = parseCsv(locationsRes.data);
+                setProgramsData(parseCsv(programsRes.data));
+                setLocationsData(parseCsv(locationsRes.data));
 
-                setProgramsData(programs);      // 프로그램 데이터 저장
-                setLocationsData(locations);    // 위치 데이터 저장
-                // ----------------------------------------------------
-
-                // 필터: 20대, 남자
+                // 체력 측정 데이터 가공 (기존 로직 유지)
                 const filtered = fullStats.filter(
                     (d) =>
                         String(d.ageGroup).trim() === "20대" &&
@@ -87,17 +77,23 @@ export default function Dashboard() {
                     meanMap[key] = Number(String(s.mean).replace(/,/g, "")) || 0;
                 }
 
-                // build avg array in desired order
                 const avgArr = METRICS.map((m) => ({ metric: m, average: meanMap[m] != null ? meanMap[m] : null }));
                 setAvgData(avgArr);
 
-                const logs = Array.isArray(logsRes.data) ? logsRes.data : [];
-                const latest = logs.length ? logs[0] : null;
-                if (latest && latest.metrics) {
-                    setMyRecord(latest.metrics);
-                } else {
-                    setMyRecord(null);
-                }
+
+                // ----------------------------------------------------
+                // 💡 [핵심] CSV 데이터로 myRecord를 채웁니다. (더미 데이터 아님!)
+                // ----------------------------------------------------
+                const myRecordObject = {};
+                avgArr.forEach(item => {
+                    // 평균 배열의 데이터를 myRecord가 요구하는 Key-Value 형태로 변환
+                    if (item.metric && item.average != null) {
+                        myRecordObject[item.metric] = item.average;
+                    }
+                });
+
+                setMyRecord(myRecordObject);
+                // ----------------------------------------------------
             } catch (e) {
                 console.error(e);
                 setError("데이터 로드 실패");
