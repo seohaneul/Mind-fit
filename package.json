@@ -1,0 +1,8 @@
+{
+    "name": "mind-fit-root",
+    "private": true,
+    "scripts": {
+        "vercel-install": "npm install --prefix client --legacy-peer-deps",
+        "vercel-build": "npm run build --prefix client"
+    }
+}
