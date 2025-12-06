@@ -30,15 +30,15 @@ export default function LandingPage({ userName, setUserMood, setUserStress, setU
                 </div>
 
                 {/* Input Card */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
                     <h2 className="text-xl font-bold text-gray-800 mb-6 border-b pb-2">현재 상태 및 마인드 입력</h2>
 
                     {/* Mood Selection */}
                     <div className="mb-6">
                         <label className="block text-sm font-bold text-gray-700 mb-2">기분 선택</label>
-                        <div className="flex justify-between items-center text-sm">
+                        <div className="grid grid-cols-3 md:grid-cols-5 gap-2 text-sm">
                             {['매우 나쁨', '나쁨', '보통', '좋음', '매우 좋음'].map((m) => (
-                                <label key={m} className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                                <label key={m} className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors border border-transparent hover:border-gray-200">
                                     <input
                                         type="radio"
                                         name="mood"
@@ -47,7 +47,7 @@ export default function LandingPage({ userName, setUserMood, setUserStress, setU
                                         onChange={(e) => setMood(e.target.value)}
                                         className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
-                                    <span className={`ml-2 ${mood === m ? 'font-bold text-blue-600' : 'text-gray-600'}`}>{m}</span>
+                                    <span className={`ml-2 whitespace-nowrap ${mood === m ? 'font-bold text-blue-600' : 'text-gray-600'}`}>{m}</span>
                                 </label>
                             ))}
                         </div>
@@ -56,9 +56,9 @@ export default function LandingPage({ userName, setUserMood, setUserStress, setU
                     {/* Stress Selection */}
                     <div className="mb-6">
                         <label className="block text-sm font-bold text-gray-700 mb-2">스트레스 수준 선택</label>
-                        <div className="flex justify-between items-center text-sm">
+                        <div className="grid grid-cols-3 md:grid-cols-5 gap-2 text-sm">
                             {['매우 낮음', '낮음', '보통', '높음', '매우 높음'].map((s) => (
-                                <label key={s} className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                                <label key={s} className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors border border-transparent hover:border-gray-200">
                                     <input
                                         type="radio"
                                         name="stress"
@@ -67,7 +67,7 @@ export default function LandingPage({ userName, setUserMood, setUserStress, setU
                                         onChange={(e) => setStress(e.target.value)}
                                         className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
-                                    <span className={`ml-2 ${stress === s ? 'font-bold text-blue-600' : 'text-gray-600'}`}>{s}</span>
+                                    <span className={`ml-2 whitespace-nowrap ${stress === s ? 'font-bold text-blue-600' : 'text-gray-600'}`}>{s}</span>
                                 </label>
                             ))}
                         </div>
