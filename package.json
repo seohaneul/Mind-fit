@@ -4,5 +4,8 @@
     "scripts": {
         "vercel-install": "npm install --prefix client --legacy-peer-deps",
         "vercel-build": "npm run build --prefix client"
+    },
+    "engines": {
+        "node": ">=20.0.0"
     }
 }
