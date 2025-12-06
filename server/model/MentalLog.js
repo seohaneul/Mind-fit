@@ -11,5 +11,5 @@ const MentalLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("MentalLog", MentalLogSchema);
+module.exports = mongoose.models.MentalLog || mongoose.model("MentalLog", MentalLogSchema);
 // ...existing code...

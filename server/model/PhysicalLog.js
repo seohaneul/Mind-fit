@@ -10,4 +10,4 @@ const PhysicalLogSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("PhysicalLog", PhysicalLogSchema);
+module.exports = mongoose.models.PhysicalLog || mongoose.model("PhysicalLog", PhysicalLogSchema);

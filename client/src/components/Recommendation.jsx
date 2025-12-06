@@ -3,10 +3,18 @@ import axios from "axios";
 import { getGeminiPrescription } from "../api/gemini"; // optional API helper
 
 // Gemini UI as a separate component to avoid name collisions
-function GeminiPanel({ weakMetric }) {
-    const [mood, setMood] = useState(null);
+function GeminiPanel({ weakMetric, userMood }) {
+    const [mood, setMood] = useState(userMood);
     const [prescription, setPrescription] = useState("");
     const [loading, setLoading] = useState(false);
+
+    // Initial trigger when props change
+    useEffect(() => {
+        if (userMood) {
+            setMood(userMood);
+            handlePrescription(userMood);
+        }
+    }, [userMood, weakMetric]);
 
     const moodOptions = [
         { label: "지치고 무기력해 💧", value: "무기력함" },
@@ -16,7 +24,6 @@ function GeminiPanel({ weakMetric }) {
     ];
 
     const handlePrescription = async (selectedMood) => {
-        setMood(selectedMood);
         setLoading(true);
         setPrescription("");
         try {
@@ -39,26 +46,39 @@ function GeminiPanel({ weakMetric }) {
             <p className="text-gray-500 mb-6">
                 현재 <span className="font-bold text-blue-600">{weakMetric || "전반적인 체력"}</span> 관리가 필요하시군요.
                 <br />
-                오늘 기분은 어떠세요? Gemini가 딱 맞는 운동을 찾아드릴게요!
+                {userMood ? (
+                    <span>입력하신 기분: <span className="font-bold text-purple-600">{userMood}</span>에 맞춰 처방해 드릴게요!</span>
+                ) : (
+                    <span>오늘 기분은 어떠세요? Gemini가 딱 맞는 운동을 찾아드릴게요!</span>
+                )}
             </p>
 
-            <div className="grid grid-cols-2 gap-3 mb-6">
-                {moodOptions.map((option) => (
-                    <button
-                        key={option.value}
-                        onClick={() => handlePrescription(option.value)}
-                        disabled={loading}
-                        className={`p-4 rounded-xl font-medium transition-all transform hover:scale-105 ${mood === option.value
-                            ? "bg-purple-600 text-white shadow-md"
-                            : "bg-gray-50 text-gray-600 hover:bg-gray-100"
-                            }`}
-                    >
-                        {loading && mood === option.value ? "Gemini가 생각 중..." : option.label}
-                    </button>
-                ))}
-            </div>
+            {!userMood && (
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                    {moodOptions.map((option) => (
+                        <button
+                            key={option.value}
+                            onClick={() => handlePrescription(option.value)}
+                            disabled={loading}
+                            className={`p-4 rounded-xl font-medium transition-all transform hover:scale-105 ${mood === option.value
+                                ? "bg-purple-600 text-white shadow-md"
+                                : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                }`}
+                        >
+                            {loading && mood === option.value ? "Gemini가 생각 중..." : option.label}
+                        </button>
+                    ))}
+                </div>
+            )}
 
-            {prescription && (
+            {(loading) && (
+                <div className="flex justify-center items-center p-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    <span className="ml-3 text-gray-500 font-medium">Gemini가 맞춤 처방을 작성 중입니다...</span>
+                </div>
+            )}
+
+            {!loading && prescription && (
                 <div className="animate-fade-in-up p-5 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border-l-4 border-purple-500">
                     <div className="flex items-start gap-3">
                         <span className="text-3xl">🤖</span>
@@ -82,7 +102,7 @@ const MAP = {
 };
 
 // main Recommendation component
-export default function Recommendation({ userStats = {}, averageStats = [] }) {
+export default function Recommendation({ userStats = {}, userMood, averageStats = [] }) {
     const [weakMetric, setWeakMetric] = useState(null);
     const [keywords, setKeywords] = useState([]);
     const [places, setPlaces] = useState([]);
@@ -151,7 +171,7 @@ export default function Recommendation({ userStats = {}, averageStats = [] }) {
             </div>
 
             {/* Gemini prescription panel */}
-            <GeminiPanel weakMetric={weakMetric} />
+            <GeminiPanel weakMetric={weakMetric} userMood={userMood} />
 
             {loading && <div className="text-gray-500 mb-2">시설을 불러오는 중...</div>}
 

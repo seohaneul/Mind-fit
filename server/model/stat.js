@@ -35,4 +35,6 @@ const statSchema = new mongoose.Schema({
 // (팁) 나중에 "20대 남성의 악력 평균은?" 하고 찾을 때 검색 속도 빨라지라고 인덱스 걸어둠
 statSchema.index({ ageGroup: 1, gender: 1, metric: 1 });
 
-module.exports = mongoose.model("Stat", statSchema);
+// Check if model already exists to prevent overwrite error
+module.exports = mongoose.models.Stat || mongoose.model("Stat", statSchema);
+

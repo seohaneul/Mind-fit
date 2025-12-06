@@ -31,4 +31,4 @@ FacilitySchema.pre("save", function (next) {
   next();
 });
 
-module.exports = mongoose.model("Facility", FacilitySchema);
+module.exports = mongoose.models.Facility || mongoose.model("Facility", FacilitySchema);

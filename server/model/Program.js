@@ -11,4 +11,4 @@ const ProgramSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Program", ProgramSchema);
+module.exports = mongoose.models.Program || mongoose.model("Program", ProgramSchema);

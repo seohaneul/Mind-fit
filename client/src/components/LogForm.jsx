@@ -9,6 +9,7 @@ export default function LogForm({ onLogSubmit }) {
         BMI: "",
         체지방률: "",
     });
+    const [mood, setMood] = useState("");
     const [saving, setSaving] = useState(false);
 
     const handleChange = (e) => {
@@ -36,8 +37,8 @@ export default function LogForm({ onLogSubmit }) {
             // 🚨 [핵심 수정] 서버 전송(axios.post) 대신, 
             // 상위 컴포넌트의 상태 업데이트 함수를 호출합니다.
             if (onLogSubmit && typeof onLogSubmit === 'function') {
-                onLogSubmit(values); // Dashboard의 setMyRecord(values)를 실행!
-                console.log("데이터 입력 성공! (상위 컴포넌트 상태 업데이트):", values);
+                onLogSubmit(values, mood); // Dashboard의 setMyRecord(values, mood)를 실행!
+                console.log("데이터 입력 성공! (상위 컴포넌트 상태 업데이트):", values, mood);
             }
             // await axios.post("/api/logs/physical", { metrics, date: new Date().toISOString() });
             alert("저장되었습니다!");
@@ -55,6 +56,20 @@ export default function LogForm({ onLogSubmit }) {
             onSubmit={handleSubmit}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-white rounded-lg shadow-sm"
         >
+            {/* 기분 상태 입력 섹션 */}
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 mb-4">
+                <label className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-700 mb-1">현재 기분 상태 💭</span>
+                    <input
+                        type="text"
+                        value={mood}
+                        onChange={(e) => setMood(e.target.value)}
+                        placeholder="예: 스트레스 받아, 상쾌해, 우울해, 에너지가 넘쳐"
+                        className="block w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+                    />
+                </label>
+            </div>
+
             <label className="flex flex-col">
                 <span className="text-sm font-medium text-gray-700">악력 (kg)</span>
                 <input
