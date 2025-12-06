@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-export default function NavBar() {
+export default function NavBar({ userId, userName, onLogout }) {
     return (
         <nav className="w-full bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
             <div className="flex items-center gap-2">
@@ -36,10 +36,27 @@ export default function NavBar() {
             </div>
 
             <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-gray-900">홍길동 님</span>
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold overflow-hidden border border-gray-200">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" className="w-full h-full" />
-                </div>
+                {userId ? (
+                    <>
+                        <span className="text-sm font-bold text-gray-900">{userName || "사용자"} 님</span>
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold overflow-hidden border border-gray-200">
+                            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`} alt="avatar" className="w-full h-full" />
+                        </div>
+                        <button
+                            onClick={onLogout}
+                            className="text-xs text-red-500 hover:text-red-600 font-medium ml-2"
+                        >
+                            로그아웃
+                        </button>
+                    </>
+                ) : (
+                    <NavLink
+                        to="/login"
+                        className="text-sm bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                    >
+                        로그인
+                    </NavLink>
+                )}
             </div>
         </nav>
     );

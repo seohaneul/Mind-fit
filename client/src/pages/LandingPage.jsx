@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function LandingPage({ setUserMood, setUserStress, setUserNote }) {
+export default function LandingPage({ userName, setUserMood, setUserStress, setUserNote }) {
     const navigate = useNavigate();
     const [mood, setMood] = useState('보통');
     const [stress, setStress] = useState('보통');
@@ -23,7 +23,7 @@ export default function LandingPage({ setUserMood, setUserStress, setUserNote })
                 {/* Header Text */}
                 <div className="mb-8 text-center md:text-left">
                     <h1 className="text-3xl font-bold text-gray-900 leading-snug">
-                        오늘도 건강한 하루 되세요, 홍길동님! <br />
+                        오늘도 건강한 하루 되세요, {userName || "게스트"}님! <br />
                         <span className="text-gray-500">현재 상태와 마인드를 기록해보세요.</span>
                     </h1>
                     <p className="mt-2 text-sm text-gray-500 font-medium">{dateString}</p>

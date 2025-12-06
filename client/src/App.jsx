@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useEffect, useState, useMemo } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
 import Papa from 'papaparse';
 
 import LandingPage from "./pages/LandingPage";
 import ResultPage from "./pages/ResultPage";
 import RecordPage from "./pages/RecordPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import NavBar from "./components/NavBar";
 
 // Data Source Constants
@@ -26,11 +28,13 @@ const parseCsv = (csvText) => {
 function App() {
   // Application State
   const [loading, setLoading] = useState(true);
-  const [avgData, setAvgData] = useState([]);
+  const [fullStatsData, setFullStatsData] = useState([]); // Raw CSV data
+  const [avgData, setAvgData] = useState([]); // Calculated averages
   const [programsData, setProgramsData] = useState([]);
   const [locationsData, setLocationsData] = useState([]);
+
   const [userRecord, setUserRecord] = useState(null);
-  const [userMood, setUserMood] = useState(null); // String: "보통", "좋음" etc
+  const [userMood, setUserMood] = useState(null);
   const [userStress, setUserStress] = useState(null);
   const [userNote, setUserNote] = useState(null);
   const [error, setError] = useState(null);
@@ -38,25 +42,29 @@ function App() {
   // Auth State
   const [userId, setUserId] = useState(localStorage.getItem("mindfit_userid") || null);
   const [userName, setUserName] = useState(localStorage.getItem("mindfit_username") || null);
+  const [userAge, setUserAge] = useState(localStorage.getItem("mindfit_userage") || null);
+  const [userGender, setUserGender] = useState(localStorage.getItem("mindfit_usergender") || null);
 
-  const handleLogin = async (usernameInput) => {
+  // --- Auth Handlers ---
+  const handleLogin = async (email, password) => {
     try {
-      // Simple login via new auth endpoint
-      const res = await axios.post("/api/auth/login", { username: usernameInput });
+      const res = await axios.post("/api/auth/login", { email, password });
       if (res.data && res.data._id) {
         setUserId(res.data._id);
         setUserName(res.data.name);
+        setUserAge(res.data.age);
+        setUserGender(res.data.gender);
+
         localStorage.setItem("mindfit_userid", res.data._id);
         localStorage.setItem("mindfit_username", res.data.name);
+        localStorage.setItem("mindfit_userage", res.data.age);
+        localStorage.setItem("mindfit_usergender", res.data.gender);
         return true;
-      } else {
-        alert("로그인 응답 형식이 올바르지 않습니다.");
-        return false;
       }
     } catch (e) {
       console.error("Login failed", e);
-      const msg = e.response?.data?.error || e.message || "알 수 없는 오류";
-      alert(`로그인에 실패했습니다: ${msg}`);
+      const msg = e.response?.data?.error || "로그인 실패";
+      alert(msg);
       return false;
     }
   };
@@ -64,11 +72,22 @@ function App() {
   const handleLogout = () => {
     setUserId(null);
     setUserName(null);
+    setUserAge(null);
+    setUserGender(null);
+
     localStorage.removeItem("mindfit_userid");
     localStorage.removeItem("mindfit_username");
+    localStorage.removeItem("mindfit_userage");
+    localStorage.removeItem("mindfit_usergender");
+
+    // Clear data that shouldn't persist across users
+    setUserRecord(null);
+    setUserMood(null);
+    setUserStress(null);
+    setUserNote(null);
   };
 
-  // Initial Data Fetching
+  // --- Initial Data Fetching ---
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -86,47 +105,9 @@ function App() {
         const programs = parseCsv(programsRes.data);
         const locations = parseCsv(locationsRes.data);
 
+        setFullStatsData(fullStats);
         setProgramsData(programs);
         setLocationsData(locations);
-
-        // Calculate Averages for target demographic (20-29 Male as per original logic)
-        const targetUsers = fullStats.filter(d => {
-          const age = d.MESURE_AGE_CO;
-          const gender = d.SEXDSTN_FLAG_CD;
-          return (
-            Number(age) >= 19 && Number(age) <= 29 &&
-            ['M', 'm', '남', '남자'].includes(gender)
-          );
-        });
-
-        const getAvg = (list) => {
-          const valid = list.filter(v => v != null && !isNaN(v));
-          if (valid.length === 0) return 0;
-          return Number((valid.reduce((a, b) => a + b, 0) / valid.length).toFixed(1));
-        };
-
-        const bmiList = targetUsers.map(d => {
-          const h = d.MESURE_IEM_001_VALUE;
-          const w = d.MESURE_IEM_002_VALUE;
-          if (h && w) return w / Math.pow(h / 100, 2);
-          return null;
-        });
-
-        const fatList = targetUsers.map(d => d.MESURE_IEM_003_VALUE);
-        const gripList = targetUsers.map(d => Math.max(d.MESURE_IEM_007_VALUE || 0, d.MESURE_IEM_008_VALUE || 0));
-        const situpList = targetUsers.map(d => d.MESURE_IEM_019_VALUE);
-        const flexList = targetUsers.map(d => d.MESURE_IEM_012_VALUE);
-
-        const meanMap = {
-          "악력": getAvg(gripList),
-          "윗몸일으키기": getAvg(situpList),
-          "유연성": getAvg(flexList),
-          "BMI": getAvg(bmiList),
-          "체지방률": getAvg(fatList)
-        };
-
-        const avgArr = METRICS.map((m) => ({ metric: m, average: meanMap[m] != null ? meanMap[m] : null }));
-        setAvgData(avgArr);
 
       } catch (e) {
         console.error("Data load error", e);
@@ -141,6 +122,73 @@ function App() {
     };
   }, []);
 
+  // --- Personalized Statistics Calculation ---
+  useEffect(() => {
+    if (fullStatsData.length === 0) return;
+
+    // Determine Target Demographic
+    // If user logged in: use their age/gender.
+    // If guest: default to 20-29 Male (or general total average)
+
+    let targetMinAge = 20;
+    let targetMaxAge = 29;
+    let targetGenderKeys = ['M', 'm', '남', '남자']; // Male default
+
+    if (userId && userAge && userGender) {
+      // Age Decade Logic
+      const ageNum = Number(userAge);
+      targetMinAge = Math.floor(ageNum / 10) * 10;
+      targetMaxAge = targetMinAge + 9;
+
+      // Gender Logic
+      if (userGender === 'F') {
+        targetGenderKeys = ['F', 'f', '여', '여자'];
+      } else {
+        targetGenderKeys = ['M', 'm', '남', '남자'];
+      }
+    }
+
+    const targetUsers = fullStatsData.filter(d => {
+      const dAge = Number(d.MESURE_AGE_CO);
+      const dGender = d.SEXDSTN_FLAG_CD;
+      return (
+        dAge >= targetMinAge && dAge <= targetMaxAge &&
+        targetGenderKeys.includes(dGender)
+      );
+    });
+
+    console.log(`Calculating stats for Age: ${targetMinAge}-${targetMaxAge}, Gender: ${userGender || 'Default(M)'}. Found ${targetUsers.length} records.`);
+
+    const getAvg = (list) => {
+      const valid = list.filter(v => v != null && !isNaN(v));
+      if (valid.length === 0) return 0;
+      return Number((valid.reduce((a, b) => a + b, 0) / valid.length).toFixed(1));
+    };
+
+    const bmiList = targetUsers.map(d => {
+      const h = d.MESURE_IEM_001_VALUE;
+      const w = d.MESURE_IEM_002_VALUE;
+      if (h && w) return w / Math.pow(h / 100, 2);
+      return null;
+    });
+
+    const fatList = targetUsers.map(d => d.MESURE_IEM_003_VALUE);
+    const gripList = targetUsers.map(d => Math.max(d.MESURE_IEM_007_VALUE || 0, d.MESURE_IEM_008_VALUE || 0));
+    const situpList = targetUsers.map(d => d.MESURE_IEM_019_VALUE);
+    const flexList = targetUsers.map(d => d.MESURE_IEM_012_VALUE);
+
+    const meanMap = {
+      "악력": getAvg(gripList),
+      "윗몸일으키기": getAvg(situpList),
+      "유연성": getAvg(flexList),
+      "BMI": getAvg(bmiList),
+      "체지방률": getAvg(fatList)
+    };
+
+    const avgArr = METRICS.map((m) => ({ metric: m, average: meanMap[m] != null ? meanMap[m] : null }));
+    setAvgData(avgArr);
+
+  }, [fullStatsData, userId, userAge, userGender]);
 
   return (
     <Router>
@@ -150,6 +198,7 @@ function App() {
           path="/"
           element={
             <LandingPage
+              userName={userName}
               setUserMood={setUserMood}
               setUserStress={setUserStress}
               setUserNote={setUserNote}
@@ -157,9 +206,18 @@ function App() {
           }
         />
         <Route
+          path="/login"
+          element={<LoginPage onLogin={handleLogin} />}
+        />
+        <Route
+          path="/register"
+          element={<RegisterPage />}
+        />
+        <Route
           path="/result"
           element={
             <ResultPage
+              userName={userName}
               userRecord={userRecord}
               userMood={userMood}
               userStress={userStress}
@@ -175,7 +233,9 @@ function App() {
           element={
             <RecordPage
               userId={userId}
-              onLogin={handleLogin}
+              userName={userName}
+              userAge={userAge}
+              userGender={userGender}
               avgData={avgData}
               userRecord={userRecord}
               setUserRecord={setUserRecord}

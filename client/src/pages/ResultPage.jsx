@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Recommendation from '../components/Recommendation';
 
-export default function ResultPage({ userRecord, userMood, userStress, userNote, avgData, locationsData, programsData }) {
+export default function ResultPage({ userName, userRecord, userMood, userStress, userNote, avgData, locationsData, programsData }) {
     const navigate = useNavigate();
     // Current date formatting
     const today = new Date();
@@ -14,7 +14,7 @@ export default function ResultPage({ userRecord, userMood, userStress, userNote,
                 {/* Greeting Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 leading-snug">
-                        오늘도 건강한 하루 되세요, 홍길동님! <br />
+                        오늘도 건강한 하루 되세요, {userName || "게스트"}님! <br />
                         <span className="text-gray-500">현재 상태와 마인드를 기록해보세요.</span>
                     </h1>
                     <p className="mt-2 text-sm text-gray-500 font-medium">{dateString}</p>
@@ -26,7 +26,7 @@ export default function ResultPage({ userRecord, userMood, userStress, userNote,
 
                     <div className="mb-6">
                         <p className="text-lg text-gray-700 leading-relaxed">
-                            홍길동님의 오늘 마음 상태는 <span className="font-bold text-blue-600">'{userMood || "알 수 없음"}'</span>이며,
+                            {userName || "게스트"}님의 오늘 마음 상태는 <span className="font-bold text-blue-600">'{userMood || "알 수 없음"}'</span>이며,
                             스트레스 수준은 <span className="font-bold text-blue-600">'{userStress || "알 수 없음"}'</span>으로 기록되었습니다.
                         </p>
 
