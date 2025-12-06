@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Recommendation from '../components/Recommendation';
 
 export default function ResultPage({ userRecord, userMood, userStress, userNote, avgData, locationsData, programsData }) {
+    const navigate = useNavigate();
     // Current date formatting
     const today = new Date();
     const dateString = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일 (${['일', '월', '화', '수', '목', '금', '토'][today.getDay()]})`;
@@ -24,9 +26,21 @@ export default function ResultPage({ userRecord, userMood, userStress, userNote,
 
                     <div className="mb-6">
                         <p className="text-lg text-gray-700 leading-relaxed">
-                            홍길동님의 오늘 마음 상태는 <span className="font-bold text-blue-600">'{userMood || "'알 수 없음'"}'</span>이며,
-                            스트레스 수준은 <span className="font-bold text-blue-600">'{userStress || "'알 수 없음'"}'</span>으로 기록되었습니다.
+                            홍길동님의 오늘 마음 상태는 <span className="font-bold text-blue-600">'{userMood || "알 수 없음"}'</span>이며,
+                            스트레스 수준은 <span className="font-bold text-blue-600">'{userStress || "알 수 없음"}'</span>으로 기록되었습니다.
                         </p>
+
+                        {(!userMood || !userStress) && (
+                            <div className="mt-4">
+                                <button
+                                    onClick={() => navigate('/')}
+                                    className="px-4 py-2 bg-blue-100 text-blue-700 font-bold rounded-lg hover:bg-blue-200 transition-colors"
+                                >
+                                    메인으로 돌아가 상태 기록하기
+                                </button>
+                            </div>
+                        )}
+
                         {userNote && (
                             <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
                                 <span className="block text-sm font-bold text-gray-500 mb-1">오늘의 기록</span>
