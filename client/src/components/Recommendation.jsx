@@ -80,11 +80,50 @@ const getKeywordsFromMood = (mood, stress) => {
     return ["배드민턴", "탁구", "수영", "헬스"];
 };
 
+// Helper for Haversine distance calculation
+const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+};
+
+const deg2rad = (deg) => {
+    return deg * (Math.PI / 180);
+};
+
 // main Recommendation component
 export default function Recommendation({ userStats, userMood, userStress, userNote, locations = [] }) {
     const [keywords, setKeywords] = useState([]);
     const [places, setPlaces] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [userLoc, setUserLoc] = useState(null); // { lat, lon }
+    const [locError, setLocError] = useState(null);
+
+    // Get User Location on mount
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLoc({
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    console.error("Location error:", error);
+                    setLocError("위치 정보를 가져올 수 없어 기본 순서로 표시합니다.");
+                }
+            );
+        } else {
+            setLocError("브라우저가 위치 정보를 지원하지 않습니다.");
+        }
+    }, []);
 
     // Derive keywords from Mood/Stress (ignoring physical stats as requested)
     useEffect(() => {
@@ -92,7 +131,7 @@ export default function Recommendation({ userStats, userMood, userStress, userNo
         setKeywords(derivedKeywords);
     }, [userMood, userStress]);
 
-    // Search Facilities based on Keywords
+    // Search Facilities based on Keywords & Location
     useEffect(() => {
         if (!keywords || keywords.length === 0 || !locations || locations.length === 0) return setPlaces([]);
 
@@ -103,19 +142,44 @@ export default function Recommendation({ userStats, userMood, userStress, userNo
             // Combine all keywords for broader search
             const terms = keywords.map(k => k.toLowerCase());
 
-            const filtered = locations.filter(loc => {
+            let filtered = locations.filter(loc => {
                 const name = (loc.FCLTY_NM || loc.facilityName || "").toLowerCase();
                 const addr = (loc.RDNMADR_NM || loc.address || "").toLowerCase();
                 // Check if ANY keyword matches
                 return terms.some(term => name.includes(term) || addr.includes(term));
-            }).slice(0, 6); // Limit results
+            });
+
+            // If user location exists, calculate distance and sort
+            if (userLoc) {
+                filtered = filtered.map(loc => {
+                    // Try to parse coordinates. CSV columns: FCLTY_LA, FCLTY_LO
+                    const lat = parseFloat(loc.FCLTY_LA || loc.latitude);
+                    const lon = parseFloat(loc.FCLTY_LO || loc.longitude);
+
+                    let dist = null;
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        dist = getDistanceFromLatLonInKm(userLoc.lat, userLoc.lon, lat, lon);
+                    }
+                    return { ...loc, _distance: dist };
+                });
+
+                // Sort by distance (asc), verify valid distance
+                filtered.sort((a, b) => {
+                    if (a._distance === null) return 1;
+                    if (b._distance === null) return -1;
+                    return a._distance - b._distance;
+                });
+            }
+
+            // Slice top results
+            const sliced = filtered.slice(0, 6); // Limit results
 
             // Map to display format
-            const mapped = filtered.map((item, idx) => ({
+            const mapped = sliced.map((item, idx) => ({
                 _id: idx,
                 facilityName: item.FCLTY_NM || item.facilityName,
                 address: item.RDNMADR_NM || item.ROAD_NM_CTPRVN_NM + " " + item.ROAD_NM_SIGNGU_NM || item.address,
-                program: item.FCLTY_NM // simple fallback
+                distance: item._distance
             }));
 
             setPlaces(mapped);
@@ -125,7 +189,7 @@ export default function Recommendation({ userStats, userMood, userStress, userNo
             setLoading(false);
         }
 
-    }, [keywords, locations]);
+    }, [keywords, locations, userLoc]);
 
     if (!userMood) {
         return <div className="mt-4 text-gray-600">마인드 기록이 없습니다. 메인 화면에서 상태를 입력해 주세요.</div>;
@@ -171,9 +235,16 @@ export default function Recommendation({ userStats, userMood, userStress, userNo
                                 />
                             </div>
 
-                            <div>
-                                <div className="text-lg font-bold text-gray-800 mb-1">{p.facilityName}</div>
-                                <div className="text-sm text-gray-500 mb-2">{p.address}</div>
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <div className="text-lg font-bold text-gray-800 mb-1">{p.facilityName}</div>
+                                    <div className="text-sm text-gray-500 mb-2">{p.address}</div>
+                                </div>
+                                {p.distance != null && (
+                                    <div className="bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded-full">
+                                        {p.distance.toFixed(1)}km
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
