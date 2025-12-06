@@ -17,11 +17,19 @@ function GeminiPanel({ userMood, userStress, userNote }) {
         setLoading(true);
         setPrescription("");
         try {
-            const promptContext = `기분: ${userMood}, 스트레스: ${userStress}, 메모: ${userNote || "없음"}`;
+            const promptContext = `
+[사용자 감정 분석 요청]
+- 현재 기본 기분: ${userMood}
+- 스트레스 정도: ${userStress}
+- 사용자가 직접 작성한 감정 일기: "${userNote || "특별한 기록 없음"}"
+
+위 정보를 바탕으로 심리 상담가처럼 공감해주고, 현재 감정 상태를 개선하거나 해소할 수 있는 구체적인 운동 하나를 추천해주세요.
+일기 내용에 담긴 감정(불안, 분노, 무기력, 슬픔 등)을 읽어내어 그에 맞는 톤으로 답변해주세요.
+`;
             const result =
                 typeof getGeminiPrescription === "function"
-                    ? await getGeminiPrescription("기분 맞춤", promptContext)
-                    : `Gemini 추천: 현재 기분(${userMood})과 스트레스(${userStress})를 고려했을 때, 가벼운 유산소 운동이나 명상을 추천합니다.`;
+                    ? await getGeminiPrescription("감정 기반 맞춤 운동 처방", promptContext)
+                    : `Gemini 추천: 작성해주신 글(${userNote})을 바탕으로, 마음의 짐을 덜 수 있는 가벼운 산책이나 명상을 권해드립니다.`;
             setPrescription(result);
         } catch (e) {
             console.error(e);

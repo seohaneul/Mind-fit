@@ -75,10 +75,10 @@ export default function LandingPage({ userName, setUserMood, setUserStress, setU
 
                     {/* Text Area */}
                     <div className="mb-8">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">오늘의 기분 (글)</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">현재 기분 자세히 적기</label>
                         <textarea
                             className="w-full p-4 border border-gray-200 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all resize-none"
-                            placeholder="오늘의 긍정적인 다짐을 글로 적어보세요..."
+                            placeholder="지금 느끼는 감정이나 기분을 솔직하게 적어주세요. (예: 일이 너무 많아서 압박감이 느껴지고 답답하다. 아무런 생각 없이 땀을 흘리고 싶다...)"
                             rows="4"
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
