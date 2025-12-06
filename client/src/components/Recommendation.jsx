@@ -102,7 +102,7 @@ const MAP = {
 };
 
 // main Recommendation component
-export default function Recommendation({ userStats = {}, userMood, averageStats = [] }) {
+export default function Recommendation({ userStats = {}, userMood, averageStats = [], locations = [] }) {
     const [weakMetric, setWeakMetric] = useState(null);
     const [keywords, setKeywords] = useState([]);
     const [places, setPlaces] = useState([]);
@@ -137,19 +137,44 @@ export default function Recommendation({ userStats = {}, userMood, averageStats 
     }, [userStats, averageStats]);
 
     useEffect(() => {
-        if (!keywords || keywords.length === 0) return setPlaces([]);
+        if (!keywords || keywords.length === 0 || !locations || locations.length === 0) return setPlaces([]);
+
         const keyword = keywords[0];
         setLoading(true);
         setPlaces([]);
-        axios
-            .get(`/api/facilities/search?keyword=${encodeURIComponent(keyword)}`)
-            .then((res) => setPlaces(Array.isArray(res.data) ? res.data : []))
-            .catch((e) => {
-                console.error("Recommendation search error", e);
-                setPlaces([]);
-            })
-            .finally(() => setLoading(false));
-    }, [keywords]);
+
+        // Client-side filtering using the passed locations data
+        // This avoids API calls and works on Vercel immediately
+        try {
+            // CSV keys might be Korean or English depending on raw file, 
+            // but Dashboard.jsx parses it. Let's check keys based on kspo_facilities.csv
+            // Usually: FCLTY_NM (facility name), RDNMADR_NM (road address)
+
+            // Normalize keyword
+            const term = keyword.toLowerCase();
+
+            const filtered = locations.filter(loc => {
+                const name = (loc.FCLTY_NM || loc.facilityName || "").toLowerCase();
+                const addr = (loc.RDNMADR_NM || loc.address || "").toLowerCase();
+                // Programs info is in programs csv, but simplified facility match:
+                return name.includes(term) || addr.includes(term);
+            }).slice(0, 6); // Limit to 6 results
+
+            // Map to standardised format for display
+            const mapped = filtered.map((item, idx) => ({
+                _id: idx,
+                facilityName: item.FCLTY_NM || item.facilityName,
+                address: item.RDNMADR_NM || item.ROAD_NM_CTPRVN_NM + " " + item.ROAD_NM_SIGNGU_NM || item.address
+            }));
+
+            setPlaces(mapped);
+        } catch (e) {
+            console.error("Filtering error", e);
+        } finally {
+            setLoading(false);
+        }
+
+    }, [keywords, locations]);
 
     if (!userStats || Object.keys(userStats).length === 0) {
         return <div className="mt-4 text-gray-600">내 기록이 없습니다. 기록을 먼저 입력해 주세요.</div>;
