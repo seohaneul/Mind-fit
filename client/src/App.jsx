@@ -35,6 +35,39 @@ function App() {
   const [userNote, setUserNote] = useState(null);
   const [error, setError] = useState(null);
 
+  // Auth State
+  const [userId, setUserId] = useState(localStorage.getItem("mindfit_userid") || null);
+  const [userName, setUserName] = useState(localStorage.getItem("mindfit_username") || null);
+
+  const handleLogin = async (usernameInput) => {
+    try {
+      // Simple login via new auth endpoint
+      const res = await axios.post("/api/auth/login", { username: usernameInput });
+      if (res.data && res.data._id) {
+        setUserId(res.data._id);
+        setUserName(res.data.name);
+        localStorage.setItem("mindfit_userid", res.data._id);
+        localStorage.setItem("mindfit_username", res.data.name);
+        return true;
+      } else {
+        alert("로그인 응답 형식이 올바르지 않습니다.");
+        return false;
+      }
+    } catch (e) {
+      console.error("Login failed", e);
+      const msg = e.response?.data?.error || e.message || "알 수 없는 오류";
+      alert(`로그인에 실패했습니다: ${msg}`);
+      return false;
+    }
+  };
+
+  const handleLogout = () => {
+    setUserId(null);
+    setUserName(null);
+    localStorage.removeItem("mindfit_userid");
+    localStorage.removeItem("mindfit_username");
+  };
+
   // Initial Data Fetching
   useEffect(() => {
     let mounted = true;
@@ -111,7 +144,7 @@ function App() {
 
   return (
     <Router>
-      <NavBar />
+      <NavBar userId={userId} userName={userName} onLogout={handleLogout} />
       <Routes>
         <Route
           path="/"
@@ -141,6 +174,8 @@ function App() {
           path="/record"
           element={
             <RecordPage
+              userId={userId}
+              onLogin={handleLogin}
               avgData={avgData}
               userRecord={userRecord}
               setUserRecord={setUserRecord}

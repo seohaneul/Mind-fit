@@ -85,8 +85,9 @@ export default function LandingPage({ setUserMood, setUserStress, setUserNote })
                         />
                     </div>
 
-                    {/* Submit Button */}
+                    {/* Submit Button - type="button" to prevent accidental form submission */}
                     <button
+                        type="button"
                         onClick={handleSave}
                         className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all transform hover:scale-[1.01] active:scale-95"
                     >

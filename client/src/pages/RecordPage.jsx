@@ -16,6 +16,7 @@ import LogForm from '../components/LogForm';
 export default function RecordPage({ userId, onLogin, avgData, userRecord, setUserRecord }) {
     const [loginName, setLoginName] = useState("");
     const [history, setHistory] = useState([]);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     // Fetch History when userId changes
     useEffect(() => {
@@ -28,9 +29,12 @@ export default function RecordPage({ userId, onLogin, avgData, userRecord, setUs
         }
     }, [userId]);
 
-    const handleLoginSubmit = (e) => {
+    const handleLoginSubmit = async (e) => {
         e.preventDefault();
-        onLogin(loginName);
+        if (!loginName.trim()) return alert("이름을 입력해주세요.");
+        setIsLoggingIn(true);
+        await onLogin(loginName);
+        setIsLoggingIn(false);
     };
 
     const handleRecordSubmit = async (values) => {
@@ -51,7 +55,8 @@ export default function RecordPage({ userId, onLogin, avgData, userRecord, setUs
                 alert("기록이 저장되었습니다.");
             } catch (e) {
                 console.error("Save error", e);
-                alert("저장 중 오류가 발생했습니다.");
+                const msg = e.response?.data?.error || e.message;
+                alert("저장 중 오류가 발생했습니다: " + msg);
             }
         }
     };
@@ -70,12 +75,14 @@ export default function RecordPage({ userId, onLogin, avgData, userRecord, setUs
                             value={loginName}
                             onChange={(e) => setLoginName(e.target.value)}
                             className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
+                            disabled={isLoggingIn}
                         />
                         <button
                             type="submit"
-                            className="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition"
+                            disabled={isLoggingIn}
+                            className={`w-full py-3 text-white font-bold rounded-lg transition ${isLoggingIn ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
                         >
-                            로그인하고 시작하기
+                            {isLoggingIn ? "로그인 중..." : "로그인하고 시작하기"}
                         </button>
                     </form>
                 </div>
