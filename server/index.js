@@ -128,10 +128,12 @@ app.post("/api/programs", async (req, res) => {
 const facilitiesRouter = require("./routes/facilities");
 const statsRouter = require("./routes/stats");
 const logsRouter = require("./routes/logs");
+const authRouter = require("./routes/auth");
 
 app.use("/api/facilities", facilitiesRouter);
 app.use("/api/stats", statsRouter);
 app.use("/api/logs", logsRouter);
+app.use("/api/auth", authRouter);
 
 // =============================================================================
 // Error Handling Middleware
