@@ -56,19 +56,7 @@ export default function LogForm({ onLogSubmit }) {
             onSubmit={handleSubmit}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-white rounded-lg shadow-sm"
         >
-            {/* 기분 상태 입력 섹션 */}
-            <div className="col-span-1 md:col-span-2 lg:col-span-3 mb-4">
-                <label className="flex flex-col">
-                    <span className="text-sm font-medium text-gray-700 mb-1">현재 기분 상태 💭</span>
-                    <input
-                        type="text"
-                        value={mood}
-                        onChange={(e) => setMood(e.target.value)}
-                        placeholder="예: 스트레스 받아, 상쾌해, 우울해, 에너지가 넘쳐"
-                        className="block w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
-                    />
-                </label>
-            </div>
+            {/* 기분 상태 입력 삭제됨 */}
 
             <label className="flex flex-col">
                 <span className="text-sm font-medium text-gray-700">악력 (kg)</span>

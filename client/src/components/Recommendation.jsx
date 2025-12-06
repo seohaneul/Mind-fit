@@ -1,36 +1,27 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { getGeminiPrescription } from "../api/gemini"; // optional API helper
+import { getGeminiPrescription } from "../api/gemini";
 
-// Gemini UI as a separate component to avoid name collisions
-function GeminiPanel({ weakMetric, userMood }) {
-    const [mood, setMood] = useState(userMood);
+// Gemini UI component
+function GeminiPanel({ userMood, userStress, userNote }) {
     const [prescription, setPrescription] = useState("");
     const [loading, setLoading] = useState(false);
 
     // Initial trigger when props change
     useEffect(() => {
         if (userMood) {
-            setMood(userMood);
-            handlePrescription(userMood);
+            handlePrescription();
         }
-    }, [userMood, weakMetric]);
+    }, [userMood, userStress, userNote]);
 
-    const moodOptions = [
-        { label: "지치고 무기력해 💧", value: "무기력함" },
-        { label: "스트레스 폭발 💥", value: "스트레스 많음" },
-        { label: "평온한 상태 🌿", value: "평온함" },
-        { label: "에너지 뿜뿜 🔥", value: "활기참" },
-    ];
-
-    const handlePrescription = async (selectedMood) => {
+    const handlePrescription = async () => {
         setLoading(true);
         setPrescription("");
         try {
+            const promptContext = `기분: ${userMood}, 스트레스: ${userStress}, 메모: ${userNote || "없음"}`;
             const result =
                 typeof getGeminiPrescription === "function"
-                    ? await getGeminiPrescription(weakMetric || "체력", selectedMood)
-                    : `추천 처방: ${weakMetric || "체력"} 개선을 위한 기본 루틴 (기분: ${selectedMood})`;
+                    ? await getGeminiPrescription("기분 맞춤", promptContext)
+                    : `Gemini 추천: 현재 기분(${userMood})과 스트레스(${userStress})를 고려했을 때, 가벼운 유산소 운동이나 명상을 추천합니다.`;
             setPrescription(result);
         } catch (e) {
             console.error(e);
@@ -44,32 +35,10 @@ function GeminiPanel({ weakMetric, userMood }) {
         <div className="mt-8 p-6 bg-white rounded-2xl shadow-xl border border-gray-100">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">✨ Gemini 마인드 처방소</h2>
             <p className="text-gray-500 mb-6">
-                현재 <span className="font-bold text-blue-600">{weakMetric || "전반적인 체력"}</span> 관리가 필요하시군요.
+                입력하신 <span className="font-bold text-blue-600">마인드 데이터</span>를 분석하여
                 <br />
-                {userMood ? (
-                    <span>입력하신 기분: <span className="font-bold text-purple-600">{userMood}</span>에 맞춰 처방해 드릴게요!</span>
-                ) : (
-                    <span>오늘 기분은 어떠세요? Gemini가 딱 맞는 운동을 찾아드릴게요!</span>
-                )}
+                홍길동님에게 딱 맞는 운동 솔루션을 제공합니다.
             </p>
-
-            {!userMood && (
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                    {moodOptions.map((option) => (
-                        <button
-                            key={option.value}
-                            onClick={() => handlePrescription(option.value)}
-                            disabled={loading}
-                            className={`p-4 rounded-xl font-medium transition-all transform hover:scale-105 ${mood === option.value
-                                ? "bg-purple-600 text-white shadow-md"
-                                : "bg-gray-50 text-gray-600 hover:bg-gray-100"
-                                }`}
-                        >
-                            {loading && mood === option.value ? "Gemini가 생각 중..." : option.label}
-                        </button>
-                    ))}
-                </div>
-            )}
 
             {(loading) && (
                 <div className="flex justify-center items-center p-8">
@@ -93,78 +62,60 @@ function GeminiPanel({ weakMetric, userMood }) {
     );
 }
 
-const MAP = {
-    유연성: ["요가", "필라테스"],
-    악력: ["헬스", "웨이트"],
-    윗몸일으키기: ["크로스핏", "체력"],
-    BMI: ["수영", "에어로빅"],
-    체지방률: ["수영", "에어로빅"],
+// Mood to Exercise Keyword Mapping
+const getKeywordsFromMood = (mood, stress) => {
+    const m = mood || "보통";
+    const s = stress || "보통";
+
+    // High Stress -> Calming
+    if (s.includes("높음") || s.includes("많음")) return ["요가", "필라테스", "명상"];
+
+    // Bad Mood -> Uplifting but gentle
+    if (m.includes("나쁨") || m.includes("우울")) return ["산책", "스트레칭", "수영"];
+
+    // Good Mood -> Active
+    if (m.includes("좋음") || m.includes("활기")) return ["헬스", "크로스핏", "축구", "풋살"];
+
+    // Normal -> Balanced
+    return ["배드민턴", "탁구", "수영", "헬스"];
 };
 
 // main Recommendation component
-export default function Recommendation({ userStats = {}, userMood, averageStats = [], locations = [] }) {
-    const [weakMetric, setWeakMetric] = useState(null);
+export default function Recommendation({ userStats, userMood, userStress, userNote, locations = [] }) {
     const [keywords, setKeywords] = useState([]);
     const [places, setPlaces] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    // Derive keywords from Mood/Stress (ignoring physical stats as requested)
     useEffect(() => {
-        const avgMap = {};
-        for (const a of averageStats || []) {
-            if (a.metric != null) avgMap[String(a.metric).trim()] = Number(a.average ?? a.mean ?? 0);
-        }
+        const derivedKeywords = getKeywordsFromMood(userMood, userStress);
+        setKeywords(derivedKeywords);
+    }, [userMood, userStress]);
 
-        let best = { metric: null, diff: 0 };
-        const METRICS = ["악력", "윗몸일으키기", "유연성", "BMI", "체지방률"];
-        for (const m of METRICS) {
-            const avg = avgMap[m];
-            const me = userStats && userStats[m] != null ? Number(userStats[m]) : null;
-            if (avg == null || me == null) continue;
-            let diff = 0;
-            if (m === "BMI" || m === "체지방률") diff = me - avg; // higher-than-average is weakness
-            else diff = avg - me; // lower-than-average is weakness
-            if (diff > best.diff) best = { metric: m, diff };
-        }
-
-        if (best.metric && best.diff > 0) {
-            setWeakMetric(best.metric);
-            setKeywords(MAP[best.metric] || []);
-        } else {
-            setWeakMetric(null);
-            setKeywords([]);
-            setPlaces([]);
-        }
-    }, [userStats, averageStats]);
-
+    // Search Facilities based on Keywords
     useEffect(() => {
         if (!keywords || keywords.length === 0 || !locations || locations.length === 0) return setPlaces([]);
 
-        const keyword = keywords[0];
         setLoading(true);
         setPlaces([]);
 
-        // Client-side filtering using the passed locations data
-        // This avoids API calls and works on Vercel immediately
         try {
-            // CSV keys might be Korean or English depending on raw file, 
-            // but Dashboard.jsx parses it. Let's check keys based on kspo_facilities.csv
-            // Usually: FCLTY_NM (facility name), RDNMADR_NM (road address)
-
-            // Normalize keyword
-            const term = keyword.toLowerCase();
+            // Combine all keywords for broader search
+            const terms = keywords.map(k => k.toLowerCase());
 
             const filtered = locations.filter(loc => {
                 const name = (loc.FCLTY_NM || loc.facilityName || "").toLowerCase();
                 const addr = (loc.RDNMADR_NM || loc.address || "").toLowerCase();
-                // Programs info is in programs csv, but simplified facility match:
-                return name.includes(term) || addr.includes(term);
-            }).slice(0, 6); // Limit to 6 results
+                // Check if ANY keyword matches
+                return terms.some(term => name.includes(term) || addr.includes(term));
+            }).slice(0, 6); // Limit results
 
-            // Map to standardised format for display
+            // Map to display format
             const mapped = filtered.map((item, idx) => ({
                 _id: idx,
                 facilityName: item.FCLTY_NM || item.facilityName,
-                address: item.RDNMADR_NM || item.ROAD_NM_CTPRVN_NM + " " + item.ROAD_NM_SIGNGU_NM || item.address
+                address: item.RDNMADR_NM || item.ROAD_NM_CTPRVN_NM + " " + item.ROAD_NM_SIGNGU_NM || item.address,
+                program: item.FCLTY_NM // simple fallback
             }));
 
             setPlaces(mapped);
@@ -176,45 +127,57 @@ export default function Recommendation({ userStats = {}, userMood, averageStats 
 
     }, [keywords, locations]);
 
-    if (!userStats || Object.keys(userStats).length === 0) {
-        return <div className="mt-4 text-gray-600">내 기록이 없습니다. 기록을 먼저 입력해 주세요.</div>;
-    }
-
-    if (!weakMetric) {
-        return <div className="mt-4 text-green-600 font-semibold">현재 평균 대비 뚜렷한 약점이 없습니다.</div>;
+    if (!userMood) {
+        return <div className="mt-4 text-gray-600">마인드 기록이 없습니다. 메인 화면에서 상태를 입력해 주세요.</div>;
     }
 
     return (
         <div className="mt-6">
             <div className="mb-3">
                 <div className="text-lg">
-                    당신의 부족한 점은 <span className="font-bold text-indigo-600">{weakMetric}</span>입니다.
+                    <span className="font-bold text-indigo-600">{userMood}</span> 기분과 <span className="font-bold text-indigo-600">{userStress}</span> 스트레스 수준에 맞는 활동입니다.
                 </div>
                 <div className="text-sm mt-1">
-                    추천 운동: <span className="font-semibold text-blue-600">{(keywords || []).join(", ")}</span>
+                    추천 키워드: <span className="font-semibold text-blue-600">{(keywords || []).join(", ")}</span>
                 </div>
             </div>
 
             {/* Gemini prescription panel */}
-            <GeminiPanel weakMetric={weakMetric} userMood={userMood} />
+            <GeminiPanel userMood={userMood} userStress={userStress} userNote={userNote} />
 
-            {loading && <div className="text-gray-500 mb-2">시설을 불러오는 중...</div>}
+            <div className="mt-8">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">내 주변 추천 공공시설 (TOP 3)</h2>
+                {loading && <div className="text-gray-500 mb-2">시설을 찾고 있습니다...</div>}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                {places.length === 0 && !loading && <div className="text-gray-600">추천 시설이 없습니다.</div>}
-
-                {places.map((p) => (
-                    <div
-                        key={p._id}
-                        className="p-4 bg-white border-2 rounded-lg hover:shadow-lg transition-shadow duration-200"
-                        style={{ borderColor: "#c7d2fe" }}
-                    >
-                        <div className="text-base font-semibold text-gray-800 mb-1">{p.facilityName}</div>
-                        <div className="text-sm text-gray-500">
-                            {p.address || (p.location && `${p.location.coordinates[1]}, ${p.location.coordinates[0]}`)}
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                    {places.length === 0 && !loading && (
+                        <div className="p-6 bg-gray-50 rounded-lg text-center text-gray-500">
+                            해당 키워드({keywords.join(", ")})와 일치하는 주변 공공시설을 찾지 못했습니다.
                         </div>
-                    </div>
-                ))}
+                    )}
+
+                    {places.map((p) => (
+                        <div
+                            key={p._id}
+                            className="flex items-center p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-shadow duration-200"
+                        >
+                            {/* Placeholder Image */}
+                            <div className="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden mr-4 relative group">
+                                <img
+                                    src={`https://source.unsplash.com/200x200/?${keywords[0] || "gym"},sports`}
+                                    alt="facility"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => { e.target.src = 'https://via.placeholder.com/200x200?text=Mind-Fit' }}
+                                />
+                            </div>
+
+                            <div>
+                                <div className="text-lg font-bold text-gray-800 mb-1">{p.facilityName}</div>
+                                <div className="text-sm text-gray-500 mb-2">{p.address}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
