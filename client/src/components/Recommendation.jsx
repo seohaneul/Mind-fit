@@ -57,8 +57,8 @@ function GeminiPanel({ userMood, userStress, userNote, userName }) {
                         </svg>
                     </div>
                     <div>
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Gemini 마인드 처방소</h2>
-                        <p className="text-sm text-gray-500 mt-1">AI가 분석한 맞춤형 운동 솔루션</p>
+                        <h2 className="text-lg sm:text-2xl font-bold text-gray-800">Gemini 마인드 처방소</h2>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">AI가 분석한 맞춤형 운동 솔루션</p>
                     </div>
                 </div>
 

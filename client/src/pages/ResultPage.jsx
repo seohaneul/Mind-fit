@@ -13,19 +13,19 @@ export default function ResultPage({ userName, userRecord, userMood, userStress,
             <div className="max-w-4xl mx-auto px-4 pt-10">
                 {/* Greeting Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 leading-snug">
+                    <h1 className="text-xl md:text-3xl font-bold text-gray-900 leading-snug">
                         오늘도 건강한 하루 되세요, {userName || "게스트"}님! <br />
-                        <span className="text-gray-500">현재 상태와 마인드를 기록해보세요.</span>
+                        <span className="text-gray-500 text-sm md:text-base">현재 상태와 마인드를 기록해보세요.</span>
                     </h1>
-                    <p className="mt-2 text-sm text-gray-500 font-medium">{dateString}</p>
+                    <p className="mt-2 text-xs md:text-sm text-gray-500 font-medium">{dateString}</p>
                 </div>
 
                 {/* Summary Card */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6">
-                    <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">분석 결과 및 요약</h2>
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-6">
+                    <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-4 pb-2 border-b">분석 결과 및 요약</h2>
 
                     <div className="mb-6">
-                        <p className="text-lg text-gray-700 leading-relaxed">
+                        <p className="text-base md:text-lg text-gray-700 leading-relaxed">
                             {userName || "게스트"}님의 오늘 마음 상태는 <span className="font-bold text-blue-600">'{userMood || "알 수 없음"}'</span>이며,
                             스트레스 수준은 <span className="font-bold text-blue-600">'{userStress || "알 수 없음"}'</span>으로 기록되었습니다.
                         </p>
@@ -34,7 +34,7 @@ export default function ResultPage({ userName, userRecord, userMood, userStress,
                             <div className="mt-4">
                                 <button
                                     onClick={() => navigate('/')}
-                                    className="px-4 py-2 bg-blue-100 text-blue-700 font-bold rounded-lg hover:bg-blue-200 transition-colors"
+                                    className="px-4 py-2 bg-blue-100 text-blue-700 font-bold rounded-lg hover:bg-blue-200 transition-colors text-sm md:text-base"
                                 >
                                     메인으로 돌아가 상태 기록하기
                                 </button>
