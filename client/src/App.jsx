@@ -9,6 +9,7 @@ import RecordPage from "./pages/RecordPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import MyPage from "./pages/MyPage";
+import NavBar from "./components/NavBar";
 
 // Data Source Constants
 const METRICS = ["악력", "윗몸일으키기", "유연성", "BMI", "체지방률"];
