@@ -2,16 +2,18 @@ import React, { useEffect, useState } from "react";
 import { getGeminiPrescription } from "../api/gemini";
 
 // Gemini UI component
-function GeminiPanel({ userMood, userStress, userNote }) {
+function GeminiPanel({ userMood, userStress, userNote, userName }) {
     const [prescription, setPrescription] = useState("");
     const [loading, setLoading] = useState(false);
+
+    const displayName = userName || "회원";
 
     // Initial trigger when props change
     useEffect(() => {
         if (userMood) {
             handlePrescription();
         }
-    }, [userMood, userStress, userNote]);
+    }, [userMood, userStress, userNote, userName]);
 
 
     const handlePrescription = async () => {
@@ -20,6 +22,7 @@ function GeminiPanel({ userMood, userStress, userNote }) {
         try {
             const promptContext = `
 [사용자 감정 분석 요청]
+- 사용자 이름: ${displayName}
 - 현재 기본 기분: ${userMood}
 - 스트레스 정도: ${userStress}
 - 사용자가 직접 작성한 감정 일기: "${userNote || "특별한 기록 없음"}"
@@ -62,7 +65,7 @@ function GeminiPanel({ userMood, userStress, userNote }) {
                 <div className="bg-gray-50 rounded-2xl p-4 mb-6 border border-gray-100">
                     <p className="text-gray-600 text-sm leading-relaxed">
                         <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md text-xs font-bold mr-2 mb-1">분석 대상</span>
-                        홍길동님의 현재 기분 <span className="font-bold text-gray-900">'{userMood}'</span>과 스트레스 <span className="font-bold text-gray-900">'{userStress}'</span> 상태
+                        {displayName}님의 현재 기분 <span className="font-bold text-gray-900">'{userMood}'</span>과 스트레스 <span className="font-bold text-gray-900">'{userStress}'</span> 상태
                     </p>
                 </div>
 
@@ -133,7 +136,7 @@ const deg2rad = (deg) => {
 
 // main Recommendation component
 // main Recommendation component
-export default function Recommendation({ userStats, userMood, userStress, userNote, locations = [], programs = [] }) {
+export default function Recommendation({ userStats, userMood, userStress, userNote, locations = [], programs = [], userName }) {
     const [keywords, setKeywords] = useState([]);
     const [places, setPlaces] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -251,7 +254,7 @@ export default function Recommendation({ userStats, userMood, userStress, userNo
                 </div>
             </div>
 
-            <GeminiPanel userMood={userMood} userStress={userStress} userNote={userNote} />
+            <GeminiPanel userMood={userMood} userStress={userStress} userNote={userNote} userName={userName} />
 
             <div className="mt-8">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">내 주변 추천 공공시설 (TOP 6)</h2>

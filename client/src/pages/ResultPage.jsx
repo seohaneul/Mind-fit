@@ -55,9 +55,12 @@ export default function ResultPage({ userName, userRecord, userMood, userStress,
                 <Recommendation
                     userStats={userRecord}
                     userMood={userMood}
+                    userStress={userStress}
+                    userNote={userNote}
                     averageStats={avgData}
                     programs={programsData}
                     locations={locationsData}
+                    userName={userName}
                 />
             </div>
         </div>

@@ -70,7 +70,7 @@ export default function RegisterPage() {
                             value={formData.name}
                             onChange={handleChange}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            placeholder="홍길동"
+                            placeholder="이름을 입력하세요"
                         />
                     </div>
                     <div className="flex gap-4">
