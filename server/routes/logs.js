@@ -14,7 +14,7 @@ const getUserId = (req) => {
   return uid;
 };
 
-Router.use(requireAuth);
+router.use(requireAuth);
 
 // =============================================================================
 // Physical Logs Routes
