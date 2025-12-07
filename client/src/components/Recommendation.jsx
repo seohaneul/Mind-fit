@@ -13,6 +13,7 @@ function GeminiPanel({ userMood, userStress, userNote }) {
         }
     }, [userMood, userStress, userNote]);
 
+
     const handlePrescription = async () => {
         setLoading(true);
         setPrescription("");
