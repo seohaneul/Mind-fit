@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { getGeminiPrescription } from "../api/gemini";
 
 // Gemini UI component
-function GeminiPanel({ userMood, userStress, userNote, userName }) {
+// Gemini UI component
+function GeminiPanel({ userMood, userStress, userNote, userName, onKeywordsChange }) {
     const [prescription, setPrescription] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -19,6 +20,10 @@ function GeminiPanel({ userMood, userStress, userNote, userName }) {
     const handlePrescription = async () => {
         setLoading(true);
         setPrescription("");
+
+        // Reset keywords briefly while loading new ones
+        if (onKeywordsChange) onKeywordsChange([]);
+
         try {
             const promptContext = `
 [사용자 감정 분석 요청]
@@ -30,14 +35,40 @@ function GeminiPanel({ userMood, userStress, userNote, userName }) {
 위 정보를 바탕으로 심리 상담가처럼 공감해주고, 현재 감정 상태를 개선하거나 해소할 수 있는 구체적인 운동 하나를 추천해주세요.
 일기 내용에 담긴 감정(불안, 분노, 무기력, 슬픔 등)을 읽어내어 그에 맞는 톤으로 답변해주세요.
 `;
-            const result =
-                typeof getGeminiPrescription === "function"
-                    ? await getGeminiPrescription("감정 기반 맞춤 운동 처방", promptContext)
-                    : `Gemini 추천: 작성해주신 글(${userNote})을 바탕으로, 마음의 짐을 덜 수 있는 가벼운 산책이나 명상을 권해드립니다.`;
-            setPrescription(result);
+            // Call API
+            const result = typeof getGeminiPrescription === "function"
+                ? await getGeminiPrescription("감정 기반 맞춤 운동 처방", promptContext)
+                : { prescription: `Gemini 연결 실패.`, keywords: ["산책", "스트레칭"] };
+
+            // Handle result object or string fallback
+            let text = "";
+            let keys = [];
+
+            if (typeof result === 'object' && result.prescription) {
+                text = result.prescription;
+                keys = result.keywords || [];
+            } else if (typeof result === 'string') {
+                // Fallback if legacy string return
+                text = result;
+                // Try basic extraction
+                const basicKeys = ["수영", "요가", "헬스", "필라테스", "산책", "배드민턴", "탁구"];
+                keys = basicKeys.filter(k => text.includes(k));
+            }
+
+            setPrescription(text);
+
+            // Pass keywords to parent for searching
+            if (onKeywordsChange && keys.length > 0) {
+                onKeywordsChange(keys);
+            } else if (onKeywordsChange) {
+                // Fallback keywords if none found
+                onKeywordsChange(getKeywordsFromMood(userMood, userStress));
+            }
+
         } catch (e) {
             console.error(e);
             setPrescription("처방을 불러오는 중 오류가 발생했습니다.");
+            if (onKeywordsChange) onKeywordsChange(getKeywordsFromMood(userMood, userStress));
         } finally {
             setLoading(false);
         }
@@ -99,7 +130,7 @@ function GeminiPanel({ userMood, userStress, userNote, userName }) {
     );
 }
 
-// Mood to Exercise Keyword Mapping
+// Mood to Exercise Keyword Mapping (Fallback)
 const getKeywordsFromMood = (mood, stress) => {
     const m = mood || "보통";
     const s = stress || "보통";
@@ -135,7 +166,6 @@ const deg2rad = (deg) => {
 };
 
 // main Recommendation component
-// main Recommendation component
 export default function Recommendation({ userStats, userMood, userStress, userNote, locations = [], programs = [], userName }) {
     const [keywords, setKeywords] = useState([]);
     const [places, setPlaces] = useState([]);
@@ -167,11 +197,11 @@ export default function Recommendation({ userStats, userMood, userStress, userNo
         }
     }, []);
 
-    // Derive keywords from Mood/Stress
-    useEffect(() => {
-        const derivedKeywords = getKeywordsFromMood(userMood, userStress);
-        setKeywords(derivedKeywords);
-    }, [userMood, userStress]);
+    // Derive keywords from Mood/Stress - Handled by GeminiPanel now
+    // useEffect(() => {
+    //     // const derivedKeywords = getKeywordsFromMood(userMood, userStress);
+    //     // setKeywords(derivedKeywords);
+    // }, [userMood, userStress]);
 
     // Search Facilities
     useEffect(() => {
@@ -249,12 +279,20 @@ export default function Recommendation({ userStats, userMood, userStress, userNo
                 <div className="text-lg">
                     <span className="font-bold text-indigo-600">{userMood}</span> 기분과 <span className="font-bold text-indigo-600">{userStress}</span> 스트레스 수준에 맞는 활동입니다.
                 </div>
-                <div className="text-sm mt-1">
-                    추천 키워드: <span className="font-semibold text-blue-600">{(keywords || []).join(", ")}</span>
-                </div>
+                {keywords.length > 0 && (
+                    <div className="text-sm mt-1">
+                        AI 추천 키워드: <span className="font-bold text-blue-600 animate-pulse-once">{keywords.join(", ")}</span>
+                    </div>
+                )}
             </div>
 
-            <GeminiPanel userMood={userMood} userStress={userStress} userNote={userNote} userName={userName} />
+            <GeminiPanel
+                userMood={userMood}
+                userStress={userStress}
+                userNote={userNote}
+                userName={userName}
+                onKeywordsChange={setKeywords} // Pass setter to child
+            />
 
             <div className="mt-8">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">내 주변 추천 공공시설 (TOP 6)</h2>
