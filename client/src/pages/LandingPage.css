@@ -27,6 +27,7 @@
     0% {
         transform: scale(1);
     }
+
     100% {
         transform: scale(1.05);
     }
@@ -36,12 +37,10 @@
 .gradient-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        135deg,
-        rgba(15, 23, 42, 0.85) 0%,
-        rgba(30, 41, 59, 0.75) 50%,
-        rgba(51, 65, 85, 0.85) 100%
-    );
+    background: linear-gradient(135deg,
+            rgba(15, 23, 42, 0.85) 0%,
+            rgba(30, 41, 59, 0.75) 50%,
+            rgba(51, 65, 85, 0.85) 100%);
     backdrop-filter: blur(8px);
     z-index: 1;
 }
@@ -85,12 +84,16 @@
 }
 
 @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translate(0, 0) scale(1);
     }
+
     33% {
         transform: translate(30px, -30px) scale(1.1);
     }
+
     66% {
         transform: translate(-30px, 30px) scale(0.9);
     }
@@ -115,6 +118,7 @@
         opacity: 0;
         transform: translateY(40px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -136,6 +140,7 @@
         opacity: 0;
         transform: scale(0.8);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -151,7 +156,7 @@
     background: linear-gradient(135deg, #3b82f6, #06b6d4);
     border-radius: 50%;
     color: white;
-    box-shadow: 
+    box-shadow:
         0 10px 40px rgba(59, 130, 246, 0.4),
         0 0 80px rgba(6, 182, 212, 0.3);
     animation: pulse-glow 3s ease-in-out infinite;
@@ -163,14 +168,17 @@
 }
 
 @keyframes pulse-glow {
-    0%, 100% {
-        box-shadow: 
+
+    0%,
+    100% {
+        box-shadow:
             0 10px 40px rgba(59, 130, 246, 0.4),
             0 0 80px rgba(6, 182, 212, 0.3);
         transform: scale(1);
     }
+
     50% {
-        box-shadow: 
+        box-shadow:
             0 15px 60px rgba(59, 130, 246, 0.6),
             0 0 120px rgba(6, 182, 212, 0.5);
         transform: scale(1.05);
@@ -204,6 +212,7 @@
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -250,7 +259,7 @@
     border-radius: 9999px;
     cursor: pointer;
     overflow: hidden;
-    box-shadow: 
+    box-shadow:
         0 10px 40px rgba(59, 130, 246, 0.4),
         0 0 20px rgba(6, 182, 212, 0.3);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -263,6 +272,7 @@
         opacity: 0;
         transform: scale(0.8) translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: scale(1) translateY(0);
@@ -271,7 +281,7 @@
 
 .cta-button:hover {
     transform: scale(1.08) translateY(-3px);
-    box-shadow: 
+    box-shadow:
         0 20px 60px rgba(59, 130, 246, 0.6),
         0 0 40px rgba(6, 182, 212, 0.5);
 }
@@ -332,6 +342,7 @@
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -381,6 +392,7 @@
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -451,5 +463,18 @@
 
     .feature-pills {
         gap: 0.75rem;
+    }
+
+    .brand-title {
+        font-size: 2rem !important;
+    }
+
+    .main-tagline {
+        font-size: 1.2rem !important;
+        margin-bottom: 1rem;
+    }
+
+    .sub-tagline {
+        font-size: 0.9rem;
     }
 }
