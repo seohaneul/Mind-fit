@@ -22,9 +22,9 @@ export default function LandingPage({ userName, setUserMood, setUserStress, setU
             <div className="max-w-xl w-full">
                 {/* Header Text */}
                 <div className="mb-8 text-center md:text-left">
-                    <h1 className="text-3xl font-bold text-gray-900 leading-snug">
+                    <h1 className="text-xl md:text-3xl font-bold text-gray-900 leading-snug">
                         오늘도 건강한 하루 되세요, {userName || "게스트"}님! <br />
-                        <span className="text-gray-500">현재 상태와 마인드를 기록해보세요.</span>
+                        <span className="text-gray-500 text-sm md:text-base">현재 상태와 마인드를 기록해보세요.</span>
                     </h1>
                     <p className="mt-2 text-sm text-gray-500 font-medium">{dateString}</p>
                 </div>
