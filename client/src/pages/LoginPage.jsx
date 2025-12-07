@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function LoginPage({ onLogin }) {
     const navigate = useNavigate();
+    const location = useLocation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -13,7 +14,8 @@ export default function LoginPage({ onLogin }) {
         const success = await onLogin(email, password);
         setLoading(false);
         if (success) {
-            navigate('/');
+            const from = location.state?.from?.pathname || "/";
+            navigate(from, { replace: true });
         }
     };
 

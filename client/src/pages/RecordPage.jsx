@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     ResponsiveContainer,
     BarChart,
@@ -16,6 +16,7 @@ import LogForm from '../components/LogForm';
 
 export default function RecordPage({ userId, userName, userAge, userGender, avgData, userRecord, setUserRecord }) {
     const navigate = useNavigate();
+    const location = useLocation();
     const [history, setHistory] = useState([]);
 
     // Fetch History when userId changes
@@ -61,7 +62,7 @@ export default function RecordPage({ userId, userName, userAge, userGender, avgD
                     <p className="text-gray-500 mb-6">기록 관리 및 맞춤형 통계를 보려면 로그인하세요.</p>
 
                     <button
-                        onClick={() => navigate('/login')}
+                        onClick={() => navigate('/login', { state: { from: location } })}
                         className="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition"
                     >
                         로그인 페이지로 이동
@@ -151,11 +152,11 @@ export default function RecordPage({ userId, userName, userAge, userGender, avgD
                     </div>
 
                     {/* Right Column: History Table */}
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full overflow-hidden flex flex-col">
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full flex flex-col max-h-[600px]">
                         <h2 className="text-lg font-bold text-gray-800 mb-4">측정 기록 히스토리</h2>
-                        <div className="overflow-auto flex-1">
+                        <div className="overflow-auto flex-1 custom-scrollbar">
                             <table className="w-full text-sm text-left text-gray-600">
-                                <thead className="bg-gray-50 text-gray-700 uppercase font-medium">
+                                <thead className="bg-gray-50 text-gray-700 uppercase font-medium sticky top-0">
                                     <tr>
                                         <th className="px-4 py-3 rounded-l-lg">날짜</th>
                                         <th className="px-2 py-3">악력</th>

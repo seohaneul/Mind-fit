@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function MyPage({ userId, userName, userAge, userGender, userEmail, onLogout, onUpdateUser }) {
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Edit Form State
     const [name, setName] = useState(userName || '');
@@ -76,8 +77,17 @@ export default function MyPage({ userId, userName, userAge, userGender, userEmai
 
     if (!userId) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p>로그인이 필요한 페이지입니다.</p>
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+                <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg text-center">
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">로그인이 필요합니다</h2>
+                    <p className="text-gray-500 mb-6">마이페이지에 접근하려면 먼저 로그인해주세요.</p>
+                    <button
+                        onClick={() => navigate('/login', { state: { from: location } })}
+                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors"
+                    >
+                        로그인 하러 가기
+                    </button>
+                </div>
             </div>
         );
     }
