@@ -141,5 +141,19 @@ router.get("/mental/latest", async (req, res) => {
   }
 });
 
+// DELETE /api/logs/reset -> 모든 기록 초기화
+router.delete("/reset", async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    await PhysicalLog.deleteMany({ user: userId });
+    await MentalLog.deleteMany({ user: userId });
+    res.json({ message: "모든 기록이 초기화되었습니다." });
+  } catch (err) {
+    console.error("Error resetting logs:", err);
+    res.status(err.message.includes("Unauthorized") ? 401 : 500)
+      .json({ error: "Failed to reset logs", details: err.message });
+  }
+});
+
 module.exports = router;
 

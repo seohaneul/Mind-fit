@@ -8,7 +8,7 @@ import ResultPage from "./pages/ResultPage";
 import RecordPage from "./pages/RecordPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import NavBar from "./components/NavBar";
+import MyPage from "./pages/MyPage";
 
 // Data Source Constants
 const METRICS = ["악력", "윗몸일으키기", "유연성", "BMI", "체지방률"];
@@ -44,6 +44,7 @@ function App() {
   const [userName, setUserName] = useState(localStorage.getItem("mindfit_username") || null);
   const [userAge, setUserAge] = useState(localStorage.getItem("mindfit_userage") || null);
   const [userGender, setUserGender] = useState(localStorage.getItem("mindfit_usergender") || null);
+  const [userEmail, setUserEmail] = useState(localStorage.getItem("mindfit_useremail") || null);
 
   // --- Auth Handlers ---
   const handleLogin = async (email, password) => {
@@ -54,11 +55,13 @@ function App() {
         setUserName(res.data.name);
         setUserAge(res.data.age);
         setUserGender(res.data.gender);
+        setUserEmail(res.data.email);
 
         localStorage.setItem("mindfit_userid", res.data._id);
         localStorage.setItem("mindfit_username", res.data.name);
         localStorage.setItem("mindfit_userage", res.data.age);
         localStorage.setItem("mindfit_usergender", res.data.gender);
+        localStorage.setItem("mindfit_useremail", res.data.email);
         return true;
       }
     } catch (e) {
@@ -69,16 +72,31 @@ function App() {
     }
   };
 
+  const handleUpdateUser = (updatedUser) => {
+    setUserName(updatedUser.name);
+    setUserAge(updatedUser.age);
+    setUserGender(updatedUser.gender);
+    // Email is usually not updatable or handled separately, but sync if returned
+    if (updatedUser.email) setUserEmail(updatedUser.email);
+
+    localStorage.setItem("mindfit_username", updatedUser.name);
+    localStorage.setItem("mindfit_userage", updatedUser.age);
+    localStorage.setItem("mindfit_usergender", updatedUser.gender);
+    if (updatedUser.email) localStorage.setItem("mindfit_useremail", updatedUser.email);
+  };
+
   const handleLogout = () => {
     setUserId(null);
     setUserName(null);
     setUserAge(null);
     setUserGender(null);
+    setUserEmail(null);
 
     localStorage.removeItem("mindfit_userid");
     localStorage.removeItem("mindfit_username");
     localStorage.removeItem("mindfit_userage");
     localStorage.removeItem("mindfit_usergender");
+    localStorage.removeItem("mindfit_useremail");
 
     // Clear data that shouldn't persist across users
     setUserRecord(null);
@@ -86,6 +104,15 @@ function App() {
     setUserStress(null);
     setUserNote(null);
   };
+
+  // ... (Load Initial Data Effect remains same)
+  // ... (Stats Calculation Effect remains same)
+
+  // Need to fix useEffect dep array below to include userEmail maybe, but stats don't depend on email.
+  // Actually, I am splicing this replacement into the main function body, so I need to be careful with existing code.
+  // The tool replaces contiguous block. I'll replace everything from `function App() {` down to `handleLogout` end or `return`.
+
+  // Let's target the variable declarations to handleLogout.
 
   // --- Initial Data Fetching ---
   useEffect(() => {
@@ -239,6 +266,20 @@ function App() {
               avgData={avgData}
               userRecord={userRecord}
               setUserRecord={setUserRecord}
+            />
+          }
+        />
+        <Route
+          path="/mypage"
+          element={
+            <MyPage
+              userId={userId}
+              userName={userName}
+              userAge={userAge}
+              userGender={userGender}
+              userEmail={userEmail}
+              onLogout={handleLogout}
+              onUpdateUser={handleUpdateUser}
             />
           }
         />
