@@ -533,10 +533,15 @@
 
 @media (max-width: 480px) {
     .dashboard-title {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
+        word-break: keep-all;
     }
 
     .gemini-header {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
     }
 }

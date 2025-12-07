@@ -245,18 +245,18 @@ export default function Recommendation({ userStats, userMood, userStress, userNo
                         <div
                             key={p._id}
                             onClick={() => handleFacilityClick(p)}
-                            className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all cursor-pointer active:scale-[0.99] flex justify-between items-center"
+                            className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 hover:shadow-md transition-all cursor-pointer active:scale-[0.99] flex justify-between items-center gap-3"
                         >
-                            <div>
-                                <h3 className="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">
-                                    {p.facilityName}
-                                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-normal">상세보기 &gt;</span>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-1 flex items-center gap-2 truncate">
+                                    <span className="truncate">{p.facilityName}</span>
+                                    <span className="text-[10px] sm:text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-normal whitespace-nowrap hidden sm:inline-block">상세보기 &gt;</span>
                                 </h3>
-                                <p className="text-sm text-gray-500">{p.address}</p>
+                                <p className="text-xs sm:text-sm text-gray-500 truncate">{p.address}</p>
                             </div>
                             {p.distance != null && (
-                                <div className="text-right min-w-[60px]">
-                                    <span className="block text-blue-600 font-bold text-sm">{p.distance.toFixed(1)}km</span>
+                                <div className="text-right shrink-0">
+                                    <span className="block text-blue-600 font-bold text-xs sm:text-sm">{p.distance.toFixed(1)}km</span>
                                 </div>
                             )}
                         </div>
