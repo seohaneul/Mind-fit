@@ -77,16 +77,25 @@ export default function MyPage({ userId, userName, userAge, userGender, userEmai
 
     if (!userId) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-                <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg text-center">
-                    <h2 className="text-xl font-bold text-gray-800 mb-2">로그인이 필요합니다</h2>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+                <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">로그인이 필요합니다</h2>
                     <p className="text-gray-500 mb-6">마이페이지에 접근하려면 먼저 로그인해주세요.</p>
+
                     <button
                         onClick={() => navigate('/login', { state: { from: location } })}
-                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors"
+                        className="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition"
                     >
-                        로그인 하러 가기
+                        로그인 페이지로 이동
                     </button>
+                    <div className="mt-4">
+                        <button
+                            onClick={() => navigate('/register')}
+                            className="text-sm text-gray-500 hover:text-gray-900"
+                        >
+                            계정이 없으신가요? 회원가입
+                        </button>
+                    </div>
                 </div>
             </div>
         );
