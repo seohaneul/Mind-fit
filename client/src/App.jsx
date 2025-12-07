@@ -220,7 +220,12 @@ function App() {
 
   return (
     <Router>
-      <NavBar userId={userId} userName={userName} onLogout={handleLogout} />
+      <NavBar
+        userId={userId}
+        userName={userName}
+        onLogout={handleLogout}
+        userProfileImage={localStorage.getItem("mindfit_userprofile")}
+      />
       <Routes>
         <Route
           path="/"

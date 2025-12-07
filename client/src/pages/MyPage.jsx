@@ -103,6 +103,46 @@ export default function MyPage({ userId, userName, userAge, userGender, userEmai
                 {/* Profile Edit Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-6 border-b pb-4">회원 정보 수정</h2>
+
+                    {/* Profile Image Section */}
+                    <div className="flex flex-col items-center mb-8">
+                        <div className="relative group cursor-pointer">
+                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-gray-100 shadow-md group-hover:border-blue-100 transition-colors">
+                                <img
+                                    src={localStorage.getItem("mindfit_userprofile") || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <label className="absolute bottom-0 right-0 bg-blue-600 p-2 rounded-full shadow-lg cursor-pointer hover:bg-blue-700 transition-colors transform translate-y-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                    <circle cx="12" cy="13" r="4"></circle>
+                                </svg>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                const base64String = reader.result;
+                                                localStorage.setItem("mindfit_userprofile", base64String);
+                                                // Force force update or callback to App
+                                                if (onUpdateUser) onUpdateUser({ ...{ name, age, gender }, profileImage: base64String });
+                                                window.location.reload(); // Simple reload to reflect changes in NavBar for now
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                />
+                            </label>
+                        </div>
+                        <p className="mt-4 text-sm text-gray-500 font-medium">프로필 사진을 변경하려면 카메라 아이콘을 클릭하세요</p>
+                    </div>
+
                     <form onSubmit={handleUpdate} className="space-y-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">이메일 (아이디)</label>
@@ -156,7 +196,7 @@ export default function MyPage({ userId, userName, userAge, userGender, userEmai
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors shadow-md"
+                                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors shadow-md w-full md:w-auto"
                             >
                                 {loading ? '저장 중...' : '정보 수정 저장'}
                             </button>
