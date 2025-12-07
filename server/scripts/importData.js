@@ -216,7 +216,7 @@ async function main() {
     );
   }
 
-  mongoose.connection.close();
+  await mongoose.connection.close();
 }
 
 main();
