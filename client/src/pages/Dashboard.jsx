@@ -167,12 +167,21 @@ export default function Dashboard() {
                 <h1 className="dashboard-title">
                     나의 <span className="dashboard-title-gradient">체력 분석</span>
                 </h1>
-                <Link to="/" className="back-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 12H5M12 19l-7-7 7-7" />
-                    </svg>
-                    홈으로
-                </Link>
+                <div className="flex gap-2">
+                    <Link to="/" className="back-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        <span className="hidden sm:inline">홈으로</span>
+                    </Link>
+                    <button className="back-button" onClick={() => alert("준비 중인 기능입니다.")}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span className="hidden sm:inline">마이페이지</span>
+                    </button>
+                </div>
             </div>
 
             {/* Input Form Card */}

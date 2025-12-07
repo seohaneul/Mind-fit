@@ -41,32 +41,57 @@ function GeminiPanel({ userMood, userStress, userNote }) {
     };
 
     return (
-        <div className="mt-8 p-6 bg-white rounded-2xl shadow-xl border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">✨ Gemini 마인드 처방소</h2>
-            <p className="text-gray-500 mb-6">
-                입력하신 <span className="font-bold text-blue-600">마인드 데이터</span>를 분석하여
-                <br />
-                홍길동님에게 딱 맞는 운동 솔루션을 제공합니다.
-            </p>
+        <div className="mt-8 relative overflow-hidden bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20">
+            {/* Decorative Background Elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-purple-200/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-200/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
 
-            {(loading) && (
-                <div className="flex justify-center items-center p-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                    <span className="ml-3 text-gray-500 font-medium">Gemini가 맞춤 처방을 작성 중입니다...</span>
-                </div>
-            )}
-
-            {!loading && prescription && (
-                <div className="animate-fade-in-up p-5 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border-l-4 border-purple-500">
-                    <div className="flex items-start gap-3">
-                        <span className="text-3xl">🤖</span>
-                        <div>
-                            <h3 className="font-bold text-purple-900 mb-1">Gemini의 처방전</h3>
-                            <p className="text-gray-700 leading-relaxed whitespace-pre-line">{prescription}</p>
-                        </div>
+            <div className="relative p-6 sm:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-lg shadow-purple-500/30 text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Gemini 마인드 처방소</h2>
+                        <p className="text-sm text-gray-500 mt-1">AI가 분석한 맞춤형 운동 솔루션</p>
                     </div>
                 </div>
-            )}
+
+                <div className="bg-gray-50 rounded-2xl p-4 mb-6 border border-gray-100">
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                        <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md text-xs font-bold mr-2 mb-1">분석 대상</span>
+                        홍길동님의 현재 기분 <span className="font-bold text-gray-900">'{userMood}'</span>과 스트레스 <span className="font-bold text-gray-900">'{userStress}'</span> 상태
+                    </p>
+                </div>
+
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                        <div className="relative w-16 h-16">
+                            <div className="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+                            <div className="absolute inset-0 border-4 border-purple-500 rounded-full border-t-transparent animate-spin"></div>
+                        </div>
+                        <p className="mt-4 text-gray-500 font-medium animate-pulse">처방전을 작성하고 있습니다...</p>
+                    </div>
+                ) : (
+                    prescription && (
+                        <div className="animate-fade-in-up bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <svg width="100" height="100" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                                💊 오늘의 처방전
+                            </h3>
+                            <div className="text-gray-700 leading-relaxed text-base sm:text-lg whitespace-pre-line font-medium">
+                                {prescription}
+                            </div>
+                        </div>
+                    )
+                )}
+            </div>
         </div>
     );
 }
