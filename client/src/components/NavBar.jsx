@@ -11,7 +11,7 @@ export default function NavBar({ userId, userName, onLogout, userProfileImage })
     const profileSrc = userProfileImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName || "User"}`;
 
     return (
-        <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm transition-all">
+        <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm transition-all relative">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
@@ -91,8 +91,8 @@ export default function NavBar({ userId, userName, onLogout, userProfileImage })
 
             {/* Mobile Menu Drawer */}
             {isMobileMenuOpen && (
-                <div className="md:hidden bg-white border-t border-gray-100 animate-slide-down">
-                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <div className="absolute top-full left-0 w-full z-50 bg-white border-b border-gray-200 shadow-xl md:hidden animate-slide-down">
+                    <div className="px-4 pt-2 pb-3 space-y-1">
                         <NavLink
                             to="/result"
                             onClick={closeMenu}
