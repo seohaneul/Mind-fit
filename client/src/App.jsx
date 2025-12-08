@@ -226,6 +226,7 @@ function App() {
           path="/"
           element={
             <LandingPage
+              userId={userId}
               userName={userName}
               setUserMood={setUserMood}
               setUserStress={setUserStress}

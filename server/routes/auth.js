@@ -1,7 +1,7 @@
 const express = require("express");
 const path = require("path");
 const User = require(path.join(__dirname, "..", "model", "user"));
-const router = express.Router("/api/auth");
+const router = express.Router("/");
 import { registerUser, loginUser, updateUser, deleteUser } from "../controller/User.Controller.js";
 
 

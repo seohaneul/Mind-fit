@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from "axios";
 
-export default function LandingPage({ userName, setUserMood, setUserStress, setUserNote }) {
+export default function LandingPage({ userId, userName, setUserMood, setUserStress, setUserNote }) {
     const navigate = useNavigate();
     const [mood, setMood] = useState('보통');
     const [stress, setStress] = useState('보통');
@@ -10,10 +11,28 @@ export default function LandingPage({ userName, setUserMood, setUserStress, setU
     const today = new Date();
     const dateString = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일 (${['일', '월', '화', '수', '목', '금', '토'][today.getDay()]})`;
 
-    const handleSave = () => {
+    const handleSave = async () => {
         setUserMood(mood);
         setUserStress(stress);
         setUserNote(note);
+
+        if (userId) {
+            try {
+                await axios.post("/api/logs/mental", {
+                    mood,
+                    stress,
+                    note
+                }, {
+                    headers: { 'x-user-id': userId }
+                });
+                console.log("Recorded mental log for user:", userId);
+            } catch (error) {
+                console.error("Failed to save mental log", error);
+                // Continue navigation even if save fails, or alert user? 
+                // Request said "if logged in save, else don't", so failure handling isn't strictly defined but non-blocking is better for UX.
+            }
+        }
+
         navigate('/result');
     };
 
