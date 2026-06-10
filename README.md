@@ -90,26 +90,6 @@ Mind-Fit/
 - MongoDB 설치 (로컬) 또는 MongoDB Atlas 계정
 - Git 설치
 
-### 1. 프로젝트 클론
-```bash
-git clone https://github.com/YOUR_USERNAME/mind-fit.git
-cd mind-fit
-```
-
-### 2. 환경 변수 설정
-
-**프론트엔드** (`client/.env`):
-```env
-VITE_GEMINI_API_KEY=your_gemini_api_key
-VITE_API_URL=http://localhost:3001
-```
-
-**백엔드** (`server/.env`):
-```env
-PORT=3001
-MONGO_URI=mongodb://127.0.0.1:27017/mindfit
-NODE_ENV=development
-```
 
 ### 3. 의존성 설치 및 실행
 
@@ -126,11 +106,6 @@ cd client
 npm install
 npm run dev
 ```
-
-### 4. 접속
-- **프론트엔드**: http://localhost:5174
-- **백엔드**: http://localhost:3001
-- **Health Check**: http://localhost:3001/health
 
 ## 📡 API 엔드포인트
 
@@ -190,27 +165,10 @@ GET  /api/logs/mental/latest                # 최근 마음 기록
 - Gemini AI 마음 처방
 - 공공시설 추천
 
-## 🤝 기여
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## 📄 라이센스
 
 KSPO Mind-Fit Project © 2025
 
-## 👥 팀
-
-- **개발자**: [Your Name]
-- **디자인**: [Designer Name]
-- **프로젝트**: 국민체육진흥공단 공모전
-
-## 📞 문의
-
-프로젝트 관련 문의: your-email@example.com
 
 ## 🙏 감사의 말
 
